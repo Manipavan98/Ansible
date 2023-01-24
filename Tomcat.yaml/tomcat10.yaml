@@ -1,0 +1,26 @@
+- name: installing tomcat9 on ubuntu
+  hosts: all
+  become: yes
+  vars:
+    tomcat_version: 10
+  tasks:
+    - name: installing jdk11
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        update_cache: true 
+        state: present
+    - name: downloading tomcat
+      ansible.builtin.get_url:
+        url: https://www-eu.apache.org/dist/tomcat/tomcat-{{ tomcat_version }}/v${VERSION}/bin/apache-tomcat-${VERSION}.tar.gz
+        dest: /opt/
+    - name: extracting tarfile 
+      ansible.builtin.unarchive:
+        src: https://www-eu.apache.org/dist/tomcat/tomcat-{{ tomcat_version }}/v${VERSION}/bin/apache-tomcat-${VERSION}.tar.gz
+        dest: /opt/tomcat/
+        remote_src: yes
+    - name: daemon reload
+      ansible.builtin.systemd:
+        name: tomcat
+        daemon_reload: yes
+        state: started
+        enabled: yes

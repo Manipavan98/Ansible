@@ -1,0 +1,17 @@
+frontend linuxtechi
+   bind 172.31.94.68
+   stats uri /haproxy?stats
+   default_backend web-servers
+
+backend web-servers
+    balance roundrobin
+    server web1 172.31.85.249
+    server web2 172.31.80.219
+
+listen stats
+   bind *:8080
+   stats enable
+   stats uri /
+   stats refresh 5s
+   stats realm Haproxy\ Statistics
+   stats auth linuxtechi:P@ss123

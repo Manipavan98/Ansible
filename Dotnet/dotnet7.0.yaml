@@ -1,0 +1,20 @@
+- name: installing dotnet on ubuntu22
+  hosts: all
+  become: yes
+  tasks:
+    - name: getting url
+      ansible.builtin.get_url:
+        url: wget https://packages.microsoft.com/config/ubuntu/22.10/packages-microsoft-prod.deb
+    - name: downloading package
+      ansible.builtin.dpkg_selections:
+        name: packages-microsoft-prod.deb
+        selection: install
+    - name: removing package
+      ansible.builtin.file:
+        path: packages.microsoft.com/config/ubuntu/22.10/packages-microsoft-prod.deb
+        state: absent
+    - name: installing dotnet7.0
+      ansible.builtin.apt:
+        name: dotnet-sdk-7.0
+        update_cache: true
+        state: present

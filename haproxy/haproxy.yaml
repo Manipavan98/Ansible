@@ -1,0 +1,29 @@
+- name: installing haproxy and webservers configuration
+  hosts: all
+  become: yes
+  tasks:
+    - name: install apache2
+      ansible.builtin.apt:
+        name: apache2
+        update_cache: true
+        state: present
+      when:
+        - ansible_facts["hostname"] != "172.31.94.68"
+    - name: adding repo
+      ansible.builtin.apt_repository:
+        repo: ppa:vbernat/haproxy-2.6
+        update_cache: true
+        state: present
+    - name: install haproxy
+      ansible.builtin.apt:
+        name: haproxy
+        update_cache: true
+        state: present
+      when:
+        - ansible_facts["hostname"] == "172.31.94.68"
+    - name: enable haproxy
+      ansible.builtin.systemd:
+        name: haproxy
+        daemon_reload: yes
+        state: started
+        enabled: yes

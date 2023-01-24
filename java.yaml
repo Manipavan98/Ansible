@@ -1,0 +1,11 @@
+- name: install java versions
+  hosts: all
+  become: yes
+  vars:
+    java_version: 17
+  tasks:
+    - name: installing java11
+      ansible.builtin.apt:
+        name: openjdk-{{ java_version }}-jdk
+        update_cache: true
+        state: present

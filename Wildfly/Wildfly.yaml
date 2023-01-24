@@ -1,0 +1,82 @@
+- name: installing Wildfly on ubuntu22
+  hosts: all
+  become: yes
+  tasks:
+    - name: install jdk11
+      ansible.builtin.apt:
+        name: openjdk-11-jdk
+        update_cache: true
+        state: present
+    - name: install wget
+      ansible.builtin.apt:
+        name: wget
+        state: present
+    - name: create group
+      ansible.builtin.group:
+        name: wildfly
+        state: present
+    - name: create a user
+      ansible.builtin.user:
+        name: wildfly
+        group: wildfly
+        system: true
+        home: /opt/wildfly
+        shell: /sbin/nologin wildfly
+        create_home: true
+    - name: download 
+      ansible.builtin.get_url:
+        url: https://github.com/wildfly/wildfly/releases/download/27.0.1.Final/wildfly-27.0.1.Final.tar.gz
+        dest: /opt/
+    - name: Unarchive a file that is already on the remote machine
+      ansible.builtin.unarchive:
+        src: https://github.com/wildfly/wildfly/releases/download/27.0.1.Final/wildfly-27.0.1.Final.tar.gz
+        dest: /opt/
+        remote_src: yes
+    - name: Copy using owner and permissions
+      ansible.builtin.copy:
+        src: /opt/wildfly-27.0.1.Final/
+        dest: /opt/wildfly
+        owner: wildfly
+        group: wildfly
+        remote_src: true
+        mode: '777'
+    - name: change permissions of wildfly
+      ansible.builtin.file:
+        path: /opt/wildfly
+        owner: wildfly
+        group: wildfly
+        recurse: true
+        state: directory
+        mode: '777'
+    - name: create directory in /etc
+      ansible.builtin.file:
+        path: /etc/wildfly
+        state: directory
+        mode: '0777'
+    - name: copy configuration file
+      ansible.builtin.copy:
+        src: /opt/wildfly/docs/contrib/scripts/systemd/wildfly.conf
+        dest: /etc/wildfly/
+        remote_src: true
+    - name: copy systemd service
+      ansible.builtin.copy:
+        src: /opt/wildfly/docs/contrib/scripts/systemd/wildfly.service  
+        dest: /etc/systemd/system/
+        remote_src: true
+    - name: copy launch.sh
+      ansible.builtin.copy:
+        src: /opt/wildfly/docs/contrib/scripts/systemd/launch.sh
+        dest: /opt/wildfly/bin/
+        remote_src: true
+    - name: daemon reload
+      ansible.builtin.systemd:
+        daemon_reload: true
+    - name: start wildfly service
+      ansible.builtin.systemd:
+        state: started
+        name: wildfly.service
+    - name: Enable service wildfly
+      ansible.builtin.systemd:
+        name: wildfly.service
+        enabled: yes
+    

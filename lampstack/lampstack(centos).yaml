@@ -1,0 +1,20 @@
+- name: installing lamp stack on centos 8
+  hosts: all
+  become: yes
+  tasks: 
+    - name: install httpd
+      ansible.builtin.dnf:
+        name: httpd
+        update_cache: true
+        state: present
+    - name: Enable service httpd 
+      ansible.builtin.systemd:
+        name: httpd
+        enabled: yes
+    - name: Make sure a service unit is running
+      ansible.builtin.systemd:
+        state: started
+        name: httpd
+    - name: installing php and php-mysql
+      ansible.builtin.dnf:
+        name: php 
